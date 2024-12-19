@@ -34,14 +34,14 @@ jobs:
           git_user_signingkey: true
           git_commit_gpgsign: true
 
-      - name: Commit and Push 1000 Changes
+      - name: Commit and Push 100 Changes
         run: |
           git config user.name "0x3EF8"
           git config user.email "0x3ef8@gmail.com"
-          for i in $(seq 1 1000); do
+          for i in $(seq 1 100); do
             echo "🔥 Commit number $i - The void swallows all: $(date)" >> abyss/README.yml
             git add abyss/README.yml
-            git commit -S -m "💀 Auto-Commit from the Abyss: Commit number $i - The code loops forever in the void."
+            git commit -S -m "💀 Auto-Commit from the Abyss: Commit number $i - The code loops forever in the void. Mwahahahaha!"
           done
           git push
         env:
