@@ -2,7 +2,7 @@ name: GitHell
 
 on:
   schedule:
-    - cron: '*/1 * * * *'
+    - cron: '*/5 * * * *'  
   workflow_dispatch:
 
 permissions:
@@ -38,7 +38,7 @@ jobs:
         run: |
           git config user.name "0x3EF8"
           git config user.email "0x3ef8@gmail.com"
-          git add gen/README.yml
+          git add abyss/README.yml
           git commit -S -m "💀 Auto Update: $(date) - The clock ticks relentlessly. The void awaits your soul."
           git push
         env:
