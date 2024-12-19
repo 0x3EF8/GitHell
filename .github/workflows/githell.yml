@@ -38,10 +38,14 @@ jobs:
         run: |
           git config user.name "0x3EF8"
           git config user.email "0x3ef8@gmail.com"
-          for i in $(seq 1 100); do
-            echo "🔥 Commit number $i - The void swallows all: $(date)" >> abyss/README.yml
+          count=0
+          while [ $count -lt 100 ]; do
+            # Generate a random ID for the commit message
+            commit_id=$(cat /proc/sys/kernel/random/uuid)
+            echo "🔥 ID $commit_id - The void swallows all: $(date)" >> abyss/README.yml
             git add abyss/README.yml
-            git commit -S -m "💀 Auto-Commit from the Abyss: Commit number $i - The code loops forever in the void. Mwahahahaha!"
+            git commit -S -m "💀 Auto-Commit from the Abyss: ID $commit_id - The code loops forever in the void. Mwahahahaha!"
+            count=$((count+1))
           done
           git push
         env:
