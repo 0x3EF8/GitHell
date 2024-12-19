@@ -10,7 +10,7 @@ public class Doom {
                 folder.mkdir();
             }
 
-            File file = new File("abyss/README.yml");
+            File file = new File("gen/README.yml");
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
                 writer.write("Generated at: " + new Date().toString() + " - Time’s up. The abyss consumes all.");
                 System.out.println("The file has been forged in the darkest depths of GitHell: " + file.getAbsolutePath());
