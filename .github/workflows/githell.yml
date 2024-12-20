@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   update:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
@@ -21,10 +21,10 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
 
-      - name: Abyss
+      - name: Create Abyss Directory
         run: mkdir -p abyss
 
-      - name: GPG Key
+      - name: Configure GPG Key
         uses: crazy-max/ghaction-import-gpg@v5
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
@@ -33,7 +33,7 @@ jobs:
           git_user_signingkey: true
           git_commit_gpgsign: true
 
-      - name: Fetch commit count
+      - name: Fetch Commit Count
         id: commit_count
         run: |
           current_time=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -41,16 +41,33 @@ jobs:
           commit_count=$(git rev-list --count --since="$past_time" --until="$current_time" HEAD)
           echo "commit_count=$commit_count" >> $GITHUB_ENV
 
-      - name: Track execution
+      - name: Track Execution
         id: execution_data
         run: |
-          if [ -f abyss/README.yml ]; then
-            execution_count=$(grep -oP '(?<=Execution Count: )\d+' abyss/README.yml | tail -1)
+          if [ -f abyss/execution_data.txt ]; then
+            execution_count=$(grep -oP '(?<=Execution Count: )\d+' abyss/execution_data.txt | tail -1)
             execution_count=$((execution_count + 1))
           else
             execution_count=1
           fi
           echo "execution_count=$execution_count" >> $GITHUB_ENV
+
+      - name: Track Daily Commits
+        id: daily_commits
+        run: |
+          current_date=$(date -u +"%Y-%m-%d")
+          if [ -f abyss/daily_commits.txt ]; then
+            if grep -q "$current_date" abyss/daily_commits.txt; then
+              daily_commit_count=$(grep "$current_date" abyss/daily_commits.txt | awk '{print $5}')
+            else
+              daily_commit_count=0
+            fi
+          else
+            daily_commit_count=0
+          fi
+          daily_commit_count=$((daily_commit_count + commit_count))
+          echo "daily_commit_count=$daily_commit_count" >> $GITHUB_ENV
+          echo "Day ${execution_count} $current_date total commits $daily_commit_count" >> abyss/daily_commits.txt
 
       - name: Commit and Push Changes
         run: |
@@ -75,8 +92,15 @@ jobs:
             echo "Execution Count: ${{ env.execution_count }}" >> abyss/README.yml
             echo "Last Execution Time: $current_time" >> abyss/README.yml
             echo "----------------------------------------------------" >> abyss/README.yml
-            git add abyss/README.yml
-            git commit -S -m "If your strategy’s dirty, mine’s worse. 😈 (Total commits: $total_commits, Executions: ${{ env.execution_count }}, Last run: $current_time)"
+            echo "Total commits today: ${{ env.daily_commit_count }}" >> abyss/README.yml
+            git add abyss/README.yml abyss/execution_data.txt abyss/daily_commits.txt
+            git commit -S -m "Auto-Commit: $(date -u +"%Y-%m-%d %H:%M:%S") UTC
+            Changes: Updated README with new commit details.
+            Total commits: $total_commits
+            Execution Count: ${{ env.execution_count }}
+            Last Execution Time: $current_time
+            Commit ID: $commit_id
+            Total commits today: ${{ env.daily_commit_count }}"
             count=$((count+1))
           done
           git push
