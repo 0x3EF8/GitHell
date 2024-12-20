@@ -2,37 +2,30 @@ name: GitHell
 
 on:
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '*/5 * * * *'  
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  abyss_commits:
-    runs-on: ubuntu-latest
+  update:
+    runs-on: ubuntu-24.04
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v2
 
-      - name: Set Up Java Environment
-        uses: actions/setup-java@v3
+      - name: Set up Java
+        uses: actions/setup-java@v1
         with:
-          java-version: 11
-          distribution: 'adoptium'  
-          java-package: jdk
+          java-version: 11.0.10
 
-      - name: Prepare Abyss Directory
-        run: mkdir -p abyss
-
-      - name: Configure Git
+      - name: Abyss
         run: |
-          git config --global user.name "0x3EF8"
-          git config --global user.email "0x3ef8@gmail.com"
+          mkdir -p abyss
 
-      - name: Import GPG Key
-        uses: crazy-max/ghaction-import-gpg@v6
+      - name: GPG Key
+        uses: crazy-max/ghaction-import-gpg@v5
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
@@ -40,12 +33,13 @@ jobs:
           git_user_signingkey: true
           git_commit_gpgsign: true
 
-      - name: Generate and Commit 100 Unique Changes
+      - name: Commit and Push 100 Changes
         run: |
-          for i in $(seq 1 100); do
-            timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-            commit_id=$(cat /proc/sys/kernel/random/uuid)
-
+          git config user.name "0x3EF8"
+          git config user.email "0x3ef8@gmail.com"
+          count=0
+          while [ $count -lt 100 ]; do
+            # Dynamically change the content to ensure a new commit
             echo "  ________.__  __     ___ ___         .__  .__   " > abyss/README.yml
             echo " /  _____/|__|/  |_  /   |   \   ____ |  | |  |  " >> abyss/README.yml
             echo "/   \  ___|  \   __\/    ~    \_/ __ \|  | |  |  " >> abyss/README.yml
@@ -53,15 +47,18 @@ jobs:
             echo " \______  /__||__|   \___|_  /  \___  >____/____/ " >> abyss/README.yml
             echo "        \/                 \/       \/            " >> abyss/README.yml
             echo "----------------------------------------------------" >> abyss/README.yml
+            echo "If you think you’ve won, think again. HAHAHAHA!" >> abyss/README.yml
+            echo "----------------------------------------------------" >> abyss/README.yml
+            commit_id=$(cat /proc/sys/kernel/random/uuid)
+            timestamp=$(date --utc +%Y-%m-%dT%H:%M:%SZ)
             echo "Commit ID: $commit_id" >> abyss/README.yml
             echo "Timestamp: $timestamp" >> abyss/README.yml
             echo "Message: If you think you’ve won, think again. HAHAHAHA!" >> abyss/README.yml
             echo "----------------------------------------------------" >> abyss/README.yml
-
             git add abyss/README.yml
-            git commit -S -m "🔥 Strategic Excellence: If your strategy’s dirty, mine’s worse. 😈"
+            git commit -S -m "If your strategy’s dirty, mine’s worse. 😈"
+            count=$((count+1))
           done
-
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
