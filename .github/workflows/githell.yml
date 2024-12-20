@@ -47,18 +47,16 @@ jobs:
           if [ -f abyss/README.yml ]; then
             execution_count=$(grep -oP '(?<=Execution Count: )\d+' abyss/README.yml | tail -1)
             execution_count=$((execution_count + 1))
-            last_execution_time=$(grep -oP '(?<=Last Execution Time: ).*' abyss/README.yml | tail -1)
           else
             execution_count=1
-            last_execution_time="Never"
           fi
           echo "execution_count=$execution_count" >> $GITHUB_ENV
-          echo "last_execution_time=$last_execution_time" >> $GITHUB_ENV
 
       - name: Commit and Push Changes
         run: |
           git config user.name "0x3EF8"
           git config user.email "0x3ef8@gmail.com"
+          current_time=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           count=0
           while [ $count -lt 100 ]; do
             echo "  ________.__  __     ___ ___         .__  .__   " > abyss/README.yml
@@ -72,15 +70,13 @@ jobs:
             echo "----------------------------------------------------" >> abyss/README.yml
             commit_id=$(cat /proc/sys/kernel/random/uuid)
             total_commits=$(git rev-list --count HEAD)
-            current_time=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
             echo "Commit ID: $commit_id" >> abyss/README.yml
             echo "Commit: $total_commits" >> abyss/README.yml
             echo "Execution Count: ${{ env.execution_count }}" >> abyss/README.yml
-            echo "Last Execution Time: ${{ env.last_execution_time }}" >> abyss/README.yml
+            echo "Last Execution Time: $current_time" >> abyss/README.yml
             echo "----------------------------------------------------" >> abyss/README.yml
-            echo $current_time > abyss/README.yml
             git add abyss/README.yml
-            git commit -S -m "If your strategy’s dirty, mine’s worse. 😈 (Total commits: $total_commits, Executions: ${{ env.execution_count }}, Last run: ${{ env.last_execution_time }})"
+            git commit -S -m "If your strategy’s dirty, mine’s worse. 😈 (Total commits: $total_commits, Executions: ${{ env.execution_count }}, Last run: $current_time)"
             count=$((count+1))
           done
           git push
