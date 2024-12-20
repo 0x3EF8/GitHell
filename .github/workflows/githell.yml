@@ -2,7 +2,7 @@ name: GitHell
 
 on:
   schedule:
-    - cron: '*/5 * * * *'  # Runs every 5 minutes
+    - cron: '*/5 * * * *'  
   workflow_dispatch:
 
 permissions:
@@ -13,22 +13,16 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-      - uses: actions/checkout@v2  # Checkout the code
+      - uses: actions/checkout@v2
 
-      - name: Set up SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa  # Use the secret SSH private key
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan github.com >> ~/.ssh/known_hosts  # Add GitHub to known hosts
-
-      - name: Debug SSH connection
-        run: |
-          ssh -vT git@github.com  # Debug SSH connection to GitHub
+      - name: Set up Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11.0.10
 
       - name: Abyss
         run: |
-          mkdir -p abyss  # Create the abyss folder
+          mkdir -p abyss
 
       - name: GPG Key
         uses: crazy-max/ghaction-import-gpg@v5
@@ -39,13 +33,7 @@ jobs:
           git_user_signingkey: true
           git_commit_gpgsign: true
 
-      - name: Set up EvilGit Remote
-        run: |
-          # Add the EvilGit remote using the SSH URL
-          git remote add evilgit git@github.com:0x3EF8/EvilGit.git
-          git fetch evilgit
-
-      - name: Commit and Push 100 Changes to EvilGit
+      - name: Commit and Push 100 Changes
         run: |
           git config user.name "0x3EF8"
           git config user.email "0x3ef8@gmail.com"
@@ -61,8 +49,8 @@ jobs:
             echo "----------------------------------------------------" >> abyss/README.yml
             echo "If you think you’ve won, think again. HAHAHAHA!" >> abyss/README.yml
             echo "----------------------------------------------------" >> abyss/README.yml
-            commit_id=$(cat /proc/sys/kernel/random/uuid)  # Create a unique commit ID
-            timestamp=$(date --utc +%Y-%m-%dT%H:%M:%SZ)  # Generate the timestamp in UTC format
+            commit_id=$(cat /proc/sys/kernel/random/uuid)
+            timestamp=$(date --utc +%Y-%m-%dT%H:%M:%SZ)
             echo "Commit ID: $commit_id" >> abyss/README.yml
             echo "Timestamp: $timestamp" >> abyss/README.yml
             echo "Message: If you think you’ve won, think again. HAHAHAHA!" >> abyss/README.yml
@@ -71,7 +59,6 @@ jobs:
             git commit -S -m "If your strategy’s dirty, mine’s worse. 😈"
             count=$((count+1))
           done
-          git push evilgit main  # Push changes to EvilGit using SSH
+          git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}  # Use the secret SSH private key
