@@ -58,7 +58,7 @@ jobs:
           git config user.email "0x3ef8@gmail.com"
           current_time=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           count=0
-          while [ $count -lt 100 ]; do
+          while [ $count -lt 300 ]; do
             echo "  ________.__  __     ___ ___         .__  .__   " > abyss/README.yml
             echo " /  _____/|__|/  |_  /   |   \   ____ |  | |  |  " >> abyss/README.yml
             echo "/   \  ___|  \   __\/    ~    \_/ __ \|  | |  |  " >> abyss/README.yml
