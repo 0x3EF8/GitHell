@@ -21,8 +21,8 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
 
-      - name: Abyss 2
-        run: mkdir -p abyss2
+      - name: Ensure abyss folder exists
+        run: mkdir -p abyss
 
       - name: GPG Key
         uses: crazy-max/ghaction-import-gpg@v5
@@ -36,8 +36,8 @@ jobs:
       - name: Track execution
         id: execution_data
         run: |
-          if [ -f abyss2/README2.yml ]; then
-            execution_count=$(grep -oP '(?<=Execution Count: )\d+' abyss2/README2.yml | tail -1)
+          if [ -f abyss/README2.yml ]; then
+            execution_count=$(grep -oP '(?<=Execution Count: )\d+' abyss/README2.yml | tail -1)
             execution_count=$((execution_count + 1))
           else
             execution_count=1
@@ -56,22 +56,22 @@ jobs:
             commit_id=$(cat /proc/sys/kernel/random/uuid)
             total_commits=$(git rev-list --count HEAD)
 
-            echo "  ________.__  __     ___ ___         .__  .__   " > abyss2/README2.yml
-            echo " /  _____/|__|/  |_  /   |   \\   ____ |  | |  |  " >> abyss2/README2.yml
-            echo "/   \\  ___|  \\   __\\/    ~    \\_/ __ \\|  | |  |  " >> abyss2/README2.yml
-            echo "\\    \\_\\  \\  ||  |  \\    Y    /\\  ___/|  |_|  |__" >> abyss2/README2.yml
-            echo " \\______  /__||__|   \\___|_  /  \\___  >____/____/ " >> abyss2/README2.yml
-            echo "        \\/                 \\/       \\/            " >> abyss2/README2.yml
-            echo "----------------------------------------------------" >> abyss2/README2.yml
-            echo "The abyss grows deeper with each commit." >> abyss2/README2.yml
-            echo "----------------------------------------------------" >> abyss2/README2.yml
-            echo "Commit ID: $commit_id" >> abyss2/README2.yml
-            echo "Commit: $total_commits" >> abyss2/README2.yml
-            echo "Execution Count: ${{ env.execution_count }}" >> abyss2/README2.yml
-            echo "Last Execution Time: $current_time" >> abyss2/README2.yml
-            echo "----------------------------------------------------" >> abyss2/README2.yml
+            echo "  ________.__  __     ___ ___         .__  .__   " > abyss/README2.yml
+            echo " /  _____/|__|/  |_  /   |   \\   ____ |  | |  |  " >> abyss/README2.yml
+            echo "/   \\  ___|  \\   __\\/    ~    \\_/ __ \\|  | |  |  " >> abyss/README2.yml
+            echo "\\    \\_\\  \\  ||  |  \\    Y    /\\  ___/|  |_|  |__" >> abyss/README2.yml
+            echo " \\______  /__||__|   \\___|_  /  \\___  >____/____/ " >> abyss/README2.yml
+            echo "        \\/                 \\/       \\/            " >> abyss/README2.yml
+            echo "----------------------------------------------------" >> abyss/README2.yml
+            echo "The abyss grows deeper with each commit." >> abyss/README2.yml
+            echo "----------------------------------------------------" >> abyss/README2.yml
+            echo "Commit ID: $commit_id" >> abyss/README2.yml
+            echo "Commit: $total_commits" >> abyss/README2.yml
+            echo "Execution Count: ${{ env.execution_count }}" >> abyss/README2.yml
+            echo "Last Execution Time: $current_time" >> abyss/README2.yml
+            echo "----------------------------------------------------" >> abyss/README2.yml
 
-            git add abyss2/README2.yml
+            git add abyss/README2.yml
             git commit -S -m "🔥 GitHell-2 devours more! (Total commits: $total_commits, Executions: ${{ env.execution_count }}, Last run: $current_time)"
             count=$((count+1))
           done
