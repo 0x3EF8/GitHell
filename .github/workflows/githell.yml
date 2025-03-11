@@ -2,7 +2,7 @@ name: GitHell
 
 on:
   schedule:
-    - cron: '*/30 * * * *'
+    - cron: '*/5 * * * *' # Runs every 5 minutes
   workflow_dispatch:
 
 permissions:
@@ -21,10 +21,10 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
 
-      - name: Create Abyss Directory
+      - name: Abyss
         run: mkdir -p abyss
 
-      - name: Import GPG Key
+      - name: GPG Key
         uses: crazy-max/ghaction-import-gpg@v5
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
@@ -33,41 +33,38 @@ jobs:
           git_user_signingkey: true
           git_commit_gpgsign: true
 
-      - name: Commit and Push Changes
+      - name: Track execution
+        id: execution_data
+        run: |
+          if [ -f abyss/README.yml ]; then
+            execution_count=$(grep -oP '(?<=Execution Count: )\d+' abyss/README.yml | tail -1)
+            execution_count=$((execution_count + 1))
+          else
+            execution_count=1
+          fi
+          echo "execution_count=$execution_count" >> $GITHUB_ENV
+
+      - name: Generate and Commit 1000 Changes
         run: |
           git config user.name "0x3EF8"
           git config user.email "0x3ef8@gmail.com"
-
-          FILES=("file1.txt" "file2.txt" "file3.txt" "file4.txt" "file5.txt" "file6.txt" "file7.txt" "file8.txt" "file9.txt" "file10.txt")
           current_time=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          commit_count=1000
 
-          for FILE in "${FILES[@]}"; do
-            FILE_PATH="abyss/$FILE"
-            
-            for ((i=1; i<=2000; i++)); do
-              echo "Commit iteration $i for $FILE"
+          echo "🔥 Welcome to GitHell - The abyss consumes more!" > abyss/README.yml
+          echo "----------------------------------------------------" >> abyss/README.yml
 
-              echo "  ________.__  __     ___ ___         .__  .__   " > "$FILE_PATH"
-              echo " /  _____/|__|/  |_  /   |   \   ____ |  | |  |  " >> "$FILE_PATH"
-              echo "/   \  ___|  \   __\/    ~    \_/ __ \|  | |  |  " >> "$FILE_PATH"
-              echo "\    \_\  \  ||  |  \    Y    /\  ___/|  |_|  |__" >> "$FILE_PATH"
-              echo " \______  /__||__|   \___|_  /  \___  >____/____/ " >> "$FILE_PATH"
-              echo "        \/                 \/       \/            " >> "$FILE_PATH"
-              echo "----------------------------------------------------" >> "$FILE_PATH"
-              echo "The abyss grows deeper with each commit." >> "$FILE_PATH"
-              echo "----------------------------------------------------" >> "$FILE_PATH"
-              commit_id=$(cat /proc/sys/kernel/random/uuid)
-              total_commits=$(git rev-list --count HEAD)
-              echo "Commit ID: $commit_id" >> "$FILE_PATH"
-              echo "Commit: $total_commits" >> "$FILE_PATH"
-              echo "Last Execution Time: $current_time" >> "$FILE_PATH"
-              echo "----------------------------------------------------" >> "$FILE_PATH"
-
-              git add "$FILE_PATH"
-              git commit -S -m "Commit #$i for $FILE - Total commits: $total_commits 🌑"
-            done
+          for ((i=1; i<=$commit_count; i++)); do
+            commit_id=$(uuidgen)
+            echo "Commit #$i - ID: $commit_id" >> abyss/README.yml
           done
 
+          echo "Execution Count: ${{ env.execution_count }}" >> abyss/README.yml
+          echo "Last Execution Time: $current_time" >> abyss/README.yml
+          echo "----------------------------------------------------" >> abyss/README.yml
+
+          git add abyss/README.yml
+          git commit -S -m "🔥 1,000 commits in one shot! Execution: ${{ env.execution_count }} at $current_time"
           git push
         env:
           API_GITHUB_TOKEN: ${{ secrets.API_GITHUB_TOKEN }}
