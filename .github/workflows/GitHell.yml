@@ -1,8 +1,8 @@
-name: GitHell
+name: GitHell-2
 
 on:
   schedule:
-    - cron: '*/15 * * * *' 
+    - cron: '*/10 * * * *'  
   workflow_dispatch:
 
 permissions:
@@ -21,7 +21,7 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
 
-      - name: Abyss
+      - name: Ensure abyss folder exists
         run: mkdir -p abyss
 
       - name: GPG Key
@@ -36,8 +36,8 @@ jobs:
       - name: Track execution
         id: execution_data
         run: |
-          if [ -f abyss/README.yml ]; then
-            execution_count=$(grep -oP '(?<=Execution Count: )\d+' abyss/README.yml | tail -1)
+          if [ -f abyss/README2.yml ]; then
+            execution_count=$(grep -oP '(?<=Execution Count: )\d+' abyss/README2.yml | tail -1)
             execution_count=$((execution_count + 1))
           else
             execution_count=1
@@ -49,30 +49,30 @@ jobs:
           git config user.name "0x3EF8"
           git config user.email "0x3ef8@gmail.com"
           current_time=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          commit_count=1500
+          commit_count=2100  # Fixed to 2,100 commits per run
           count=0
 
           while [ $count -lt $commit_count ]; do
             commit_id=$(cat /proc/sys/kernel/random/uuid)
             total_commits=$(git rev-list --count HEAD)
 
-            echo "  ________.__  __     ___ ___         .__  .__   " > abyss/README.yml
-            echo " /  _____/|__|/  |_  /   |   \\   ____ |  | |  |  " >> abyss/README.yml
-            echo "/   \\  ___|  \\   __\\/    ~    \\_/ __ \\|  | |  |  " >> abyss/README.yml
-            echo "\\    \\_\\  \\  ||  |  \\    Y    /\\  ___/|  |_|  |__" >> abyss/README.yml
-            echo " \\______  /__||__|   \\___|_  /  \\___  >____/____/ " >> abyss/README.yml
-            echo "        \\/                 \\/       \\/            " >> abyss/README.yml
-            echo "----------------------------------------------------" >> abyss/README.yml
-            echo "The abyss grows deeper with each commit." >> abyss/README.yml
-            echo "----------------------------------------------------" >> abyss/README.yml
-            echo "Commit ID: $commit_id" >> abyss/README.yml
-            echo "Commit: $total_commits" >> abyss/README.yml
-            echo "Execution Count: ${{ env.execution_count }}" >> abyss/README.yml
-            echo "Last Execution Time: $current_time" >> abyss/README.yml
-            echo "----------------------------------------------------" >> abyss/README.yml
+            echo "  ________.__  __     ___ ___         .__  .__   " > abyss/README2.yml
+            echo " /  _____/|__|/  |_  /   |   \\   ____ |  | |  |  " >> abyss/README2.yml
+            echo "/   \\  ___|  \\   __\\/    ~    \\_/ __ \\|  | |  |  " >> abyss/README2.yml
+            echo "\\    \\_\\  \\  ||  |  \\    Y    /\\  ___/|  |_|  |__" >> abyss/README2.yml
+            echo " \\______  /__||__|   \\___|_  /  \\___  >____/____/ " >> abyss/README2.yml
+            echo "        \\/                 \\/       \\/            " >> abyss/README2.yml
+            echo "----------------------------------------------------" >> abyss/README2.yml
+            echo "The abyss grows deeper with each commit." >> abyss/README2.yml
+            echo "----------------------------------------------------" >> abyss/README2.yml
+            echo "Commit ID: $commit_id" >> abyss/README2.yml
+            echo "Commit: $total_commits" >> abyss/README2.yml
+            echo "Execution Count: ${{ env.execution_count }}" >> abyss/README2.yml
+            echo "Last Execution Time: $current_time" >> abyss/README2.yml
+            echo "----------------------------------------------------" >> abyss/README2.yml
 
-            git add abyss/README.yml
-            git commit -S -m "🔥 The abyss consumes more! (Total commits: $total_commits, Executions: ${{ env.execution_count }}, Last run: $current_time)"
+            git add abyss/README2.yml
+            git commit -S -m "🔥 GitHell-2 devours more! (Total commits: $total_commits, Executions: ${{ env.execution_count }}, Last run: $current_time)"
             count=$((count+1))
           done
           
