@@ -5,10 +5,6 @@ on:
     - cron: '*/5 * * * *'
   workflow_dispatch:
 
-concurrency:
-  group: githell
-  cancel-in-progress: false
-
 permissions:
   contents: write
 
@@ -17,30 +13,18 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
-
-      - name: Ensure commits branch exists
-        run: |
-          if git ls-remote --exit-code --heads origin commits; then
-            git fetch origin commits:commits
-            git checkout commits
-          else
-            git checkout -b commits
-            git push origin commits
-          fi
+      - uses: actions/checkout@v2
 
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
-          distribution: temurin
+          distribution: 'temurin'
           java-version: '11'
 
       - name: Create Abyss Directory
         run: mkdir -p abyss
 
-      - name: GPG Key
+      - name: Import GPG Key
         uses: crazy-max/ghaction-import-gpg@v5
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
@@ -49,19 +33,11 @@ jobs:
           git_user_signingkey: true
           git_commit_gpgsign: true
 
-      - name: Fetch Commit Count
-        id: commit_count
-        run: |
-          current_time=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          past_time=$(date -u -d "-5 minutes" +"%Y-%m-%dT%H:%M:%SZ")
-          commit_count=$(git rev-list --count --since="$past_time" --until="$current_time" HEAD)
-          echo "commit_count=$commit_count" >> $GITHUB_ENV
-
-      - name: Track Execution
+      - name: Track Execution Count
         id: execution_data
         run: |
-          if [ -f abyss/README.yml ]; then
-            execution_count=$(grep -oP '(?<=Execution Count: )\d+' abyss/README.yml | tail -1)
+          if [ -f abyss/CommitLog_master.yml ]; then
+            execution_count=$(grep -oP '(?<=Execution Count: )\d+' abyss/CommitLog_master.yml | tail -1)
             execution_count=$((execution_count + 1))
           else
             execution_count=1
@@ -70,45 +46,41 @@ jobs:
 
       - name: Commit and Push Changes
         run: |
-          set -e
           git config user.name "0x3EF8"
           git config user.email "0x3ef8@gmail.com"
           current_time=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          commit_count=$((1736 + RANDOM % 6))
-          echo "Running with commit_count: $commit_count"
+          # Set commit_count to 2000 for ~576,000 commits per day (2000 commits * 288 runs/day)
+          commit_count=2000
           count=0
           while [ $count -lt $commit_count ]; do
-            echo "  ________.__  __     ___ ___         .__  .__   " > abyss/README.yml
-            echo " /  _____/|__|/  |_  /   |   \   ____ |  | |  |  " >> abyss/README.yml
-            echo "/   \  ___|  \   __\/    ~    \_/ __ \|  | |  |  " >> abyss/README.yml
-            echo "\    \_\  \  ||  |  \    Y    /\  ___/|  |_|  |__" >> abyss/README.yml
-            echo " \______  /__||__|   \___|_  /  \___  >____/____/ " >> abyss/README.yml
-            echo "        \/                 \/       \/            " >> abyss/README.yml
-            echo "----------------------------------------------------" >> abyss/README.yml
-            echo "The abyss grows deeper with each commit." >> abyss/README.yml
-            echo "----------------------------------------------------" >> abyss/README.yml
+            file="abyss/CommitLog_${count}.yml"
+            duplicate="abyss/CommitLog_${count}_duplicate.yml"
+            echo "  ________.__  __     ___ ___         .__  .__   " > "$file"
+            echo " /  _____/|__|/  |_  /   |   \\   ____ |  | |  |  " >> "$file"
+            echo "/   \\  ___|  \\   __\\/    ~    \\_/ __ \\|  | |  |  " >> "$file"
+            echo "\\    \\_\\  \\  ||  |  \\    Y    /\\  ___/|  |_|  |__" >> "$file"
+            echo " \\______  /__||__|   \\___|_  /  \\___  >____/____/ " >> "$file"
+            echo "        \\/                 \\/       \\/            " >> "$file"
+            echo "----------------------------------------------------" >> "$file"
+            echo "The abyss grows deeper with each commit." >> "$file"
+            echo "----------------------------------------------------" >> "$file"
             commit_id=$(cat /proc/sys/kernel/random/uuid)
             total_commits=$(git rev-list --count HEAD)
-            echo "Commit ID: $commit_id" >> abyss/README.yml
-            echo "Commit: $total_commits" >> abyss/README.yml
-            echo "Execution Count: ${{ env.execution_count }}" >> abyss/README.yml
-            echo "Last Execution Time: $current_time" >> abyss/README.yml
-            echo "----------------------------------------------------" >> abyss/README.yml
-            git add abyss/README.yml
-            git commit -S -m "Think you’re clever? Think again. 😈 (Total commits: $total_commits, Executions: ${{ env.execution_count }}, Last run: $current_time)"
+            echo "Commit ID: $commit_id" >> "$file"
+            echo "Commit Number: $total_commits" >> "$file"
+            echo "Execution Count: $execution_count" >> "$file"
+            echo "Last Execution Time: $current_time" >> "$file"
+            echo "----------------------------------------------------" >> "$file"
+            
+            # Duplicate the file with a professional duplicate naming scheme
+            cp "$file" "$duplicate"
+            
+            # Stage both files and commit
+            git add "$file" "$duplicate"
+            git commit -S -m "Commit #$total_commits: The abyss deepens. Execution: $execution_count, Time: $current_time"
             count=$((count+1))
           done
-          git pull --rebase origin commits || true
-          attempt=0
-          max_attempts=3
-          until git push; do
-            attempt=$((attempt+1))
-            if [ $attempt -ge $max_attempts ]; then
-              echo "Failed to push after $attempt attempts"
-              exit 1
-            fi
-            sleep 10
-            git pull --rebase origin commits || true
-          done
+          git push
         env:
           API_GITHUB_TOKEN: ${{ secrets.API_GITHUB_TOKEN }}
+          execution_count: ${{ env.execution_count }}
