@@ -49,7 +49,7 @@ jobs:
           git config user.name "0x3EF8"
           git config user.email "0x3ef8@gmail.com"
           current_time=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          commit_count=2100  # Fixed to 2,100 commits per run
+          commit_count=2000
           count=0
 
           while [ $count -lt $commit_count ]; do
