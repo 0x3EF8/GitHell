@@ -5,6 +5,10 @@ on:
     - cron: '*/5 * * * *'
   workflow_dispatch:
 
+concurrency:
+  group: githell
+  cancel-in-progress: false
+
 permissions:
   contents: write
 
@@ -23,10 +27,7 @@ jobs:
             git checkout commits
           else
             git checkout -b commits
-            git push --set-upstream origin commits
-          fi
-          if [ -z "$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)" ]; then
-            git push --set-upstream origin commits
+            git push origin commits
           fi
 
       - name: Set up Java
