@@ -23,7 +23,10 @@ jobs:
             git checkout commits
           else
             git checkout -b commits
-            git push origin commits
+            git push --set-upstream origin commits
+          fi
+          if [ -z "$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)" ]; then
+            git push --set-upstream origin commits
           fi
 
       - name: Set up Java
