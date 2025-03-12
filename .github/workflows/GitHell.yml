@@ -2,7 +2,7 @@ name: GitHell
 
 on:
   schedule:
-    - cron: '*/10 * * * *'  
+    - cron: '*/5 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   update:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
@@ -49,10 +49,9 @@ jobs:
           git config user.name "0x3EF8"
           git config user.email "0x3ef8@gmail.com"
           current_time=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          commit_count=1000
-          count=0
 
-          while [ $count -lt $commit_count ]; do
+          count=0
+          while [ $count -lt 1000 ]; do
             commit_id=$(cat /proc/sys/kernel/random/uuid)
             total_commits=$(git rev-list --count HEAD)
 
@@ -72,7 +71,7 @@ jobs:
             echo "----------------------------------------------------" >> abyss/README.yml
 
             git add abyss/README.yml
-            git commit -S -m "🔥 The abyss grows! (Total commits: $total_commits, Executions: ${{ env.execution_count }}, Last run: $current_time)"
+            git commit -S -m "🌑 The abyss has no bottom... (Total commits: $total_commits, Executions: ${{ env.execution_count }}, Last run: $current_time)"
             count=$((count+1))
           done
           
